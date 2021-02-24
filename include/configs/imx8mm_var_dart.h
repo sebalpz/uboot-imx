@@ -10,6 +10,18 @@
 #include <linux/sizes.h>
 #include <asm/arch/imx-regs.h>
 
+/* 
+* sonoDSP - Custom modification to enable:
+* CONFIG_BOOTCOUNT_LIMIT & CONFIG_BOOTCOUNT_ENV
+* 
+* CONFIG_BOOTCOUNT_LIMIT: used to activate bootcount variable
+* CONFIG_BOOTCOUNT_ENV: used to store bootcount variable in u-boot env
+*/
+
+#define CONFIG_BOOTCOUNT_LIMIT
+#define CONFIG_BOOTCOUNT_ENV
+
+
 #include "imx_env.h"
 
 #ifdef CONFIG_SECURE_BOOT
@@ -102,6 +114,17 @@
 /* Initial environment variables */
 #define CONFIG_EXTRA_ENV_SETTINGS		\
 	CONFIG_MFG_ENV_SETTINGS \
+	"bootlimit=2\0" \
+	"rootfspart=2\0" \
+	"bootargs=root=/dev/mmcblk2p${rootfspart} rdinit=/bin/kinit rw single\0" \
+	"altbootcmd=" \
+		"echo Rollback to previous RootFs; " \
+		"if test ${rootfspart} = 2; " \
+			"then setenv rootfspart 3; " \
+		"else " \
+			"setenv rootfspart 2; " \
+		"fi; setenv bootcount 0; saveenv; " \
+		"bootcmd\0" \
 	"bootdir=/boot\0"	\
 	"script=boot.scr\0" \
 	"image=Image.gz\0" \
